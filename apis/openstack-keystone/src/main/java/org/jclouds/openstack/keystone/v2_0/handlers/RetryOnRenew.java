@@ -30,6 +30,7 @@ import org.jclouds.http.HttpResponse;
 import org.jclouds.http.HttpRetryHandler;
 import org.jclouds.http.handlers.BackoffLimitedRetryHandler;
 import org.jclouds.logging.Logger;
+import org.jclouds.openstack.keystone.v2_0.config.CredentialType;
 import org.jclouds.openstack.keystone.v2_0.domain.Access;
 import org.jclouds.openstack.v2_0.reference.AuthHeaders;
 
@@ -59,11 +60,15 @@ public class RetryOnRenew implements HttpRetryHandler {
 
    private final BackoffLimitedRetryHandler backoffHandler;
 
+   private final CredentialType credentialType;
+
    @Inject
    protected RetryOnRenew(LoadingCache<Credentials, Access> authenticationResponseCache,
-         BackoffLimitedRetryHandler backoffHandler) {
+         BackoffLimitedRetryHandler backoffHandler,
+         CredentialType credentialType) {
       this.authenticationResponseCache = authenticationResponseCache;
       this.backoffHandler = backoffHandler;
+      this.credentialType = credentialType;
    }
 
    /*
@@ -86,6 +91,8 @@ public class RetryOnRenew implements HttpRetryHandler {
                Multimap<String, String> headers = command.getCurrentRequest().getHeaders();
                if (headers != null && headers.containsKey(AuthHeaders.AUTH_USER)
                      && headers.containsKey(AuthHeaders.AUTH_KEY) && !headers.containsKey(AuthHeaders.AUTH_TOKEN)) {
+                  retry = false;
+               } else if (!credentialType.retryable()) {
                   retry = false;
                } else {
                   closeClientButKeepContentStream(response);

@@ -32,11 +32,17 @@ public class CredentialTypes {
 
    public static final String PASSWORD_CREDENTIALS = "passwordCredentials";
 
-   public static <T> String credentialTypeOf(T input) {
+   public static final String TOKEN_CREDENTIALS = "token";
+
+   public static <T> CredentialType credentialTypeObjectOf(T input) {
       Class<?> authenticationType = input.getClass();
       checkArgument(authenticationType.isAnnotationPresent(CredentialType.class),
                "programming error: %s should have annotation %s", authenticationType, CredentialType.class.getName());
-      return authenticationType.getAnnotation(CredentialType.class).value();
+      return authenticationType.getAnnotation(CredentialType.class);
+   }
+
+   public static <T> String credentialTypeOf(T input) {
+      return credentialTypeObjectOf(input).value();
    }
 
    public static <T> Map<String, T> indexByCredentialType(Iterable<T> iterable) {

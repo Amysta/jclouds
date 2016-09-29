@@ -30,6 +30,7 @@ import org.jclouds.http.HttpRequest;
 import org.jclouds.http.HttpResponse;
 import org.jclouds.http.handlers.BackoffLimitedRetryHandler;
 import org.jclouds.io.Payloads;
+import org.jclouds.openstack.keystone.v2_0.config.CredentialType;
 import org.jclouds.openstack.keystone.v2_0.domain.Access;
 import org.testng.annotations.Test;
 
@@ -48,6 +49,7 @@ public class RetryOnRenewTest {
       @SuppressWarnings("unchecked")
       LoadingCache<Credentials, Access> cache = createMock(LoadingCache.class);
       BackoffLimitedRetryHandler backoffHandler = createMock(BackoffLimitedRetryHandler.class);
+      CredentialType credentialType = createMock(CredentialType.class);
 
       expect(command.getCurrentRequest()).andReturn(request);
 
@@ -57,18 +59,22 @@ public class RetryOnRenewTest {
       expect(response.getPayload()).andReturn(Payloads.newStringPayload("")).anyTimes();
       expect(response.getStatusCode()).andReturn(401).atLeastOnce();
 
+      expect(credentialType.retryable()).andReturn(true).anyTimes();
+
       replay(command);
       replay(response);
       replay(cache);
       replay(backoffHandler);
+      replay(credentialType);
 
-      RetryOnRenew retry = new RetryOnRenew(cache, backoffHandler);
+      RetryOnRenew retry = new RetryOnRenew(cache, backoffHandler, credentialType);
 
       assertTrue(retry.shouldRetryRequest(command, response));
 
       verify(command);
       verify(response);
       verify(cache);
+      verify(credentialType);
    }
 
    @Test
@@ -80,6 +86,7 @@ public class RetryOnRenewTest {
       @SuppressWarnings("unchecked")
       LoadingCache<Credentials, Access> cache = createMock(LoadingCache.class);
       BackoffLimitedRetryHandler backoffHandler = createMock(BackoffLimitedRetryHandler.class);
+      CredentialType credentialType = createMock(CredentialType.class);
 
       expect(command.getCurrentRequest()).andReturn(request).anyTimes();
       expect(request.getHeaders()).andStubReturn(null);
@@ -90,9 +97,11 @@ public class RetryOnRenewTest {
       expect(response.getPayload()).andReturn(Payloads.newStringPayload("")).anyTimes();
       expect(response.getStatusCode()).andReturn(401).anyTimes();
 
-      replay(command, request, response, cache);
+      expect(credentialType.retryable()).andReturn(true).anyTimes();
 
-      RetryOnRenew retry = new RetryOnRenew(cache, backoffHandler);
+      replay(command, request, response, cache, credentialType);
+
+      RetryOnRenew retry = new RetryOnRenew(cache, backoffHandler, credentialType);
 
       for (int i = 0; i < RetryOnRenew.NUM_RETRIES - 1; ++i) {
          assertTrue(retry.shouldRetryRequest(command, response), "Expected retry to succeed");
@@ -100,7 +109,7 @@ public class RetryOnRenewTest {
 
       assertFalse(retry.shouldRetryRequest(command, response), "Expected retry to fail on attempt " + RetryOnRenew.NUM_RETRIES);
 
-      verify(command, response, cache);
+      verify(command, response, cache, credentialType);
    }
 
    @Test
@@ -110,18 +119,21 @@ public class RetryOnRenewTest {
       @SuppressWarnings("unchecked")
       LoadingCache<Credentials, Access> cache = createMock(LoadingCache.class);
       BackoffLimitedRetryHandler backoffHandler = createMock(BackoffLimitedRetryHandler.class);
+      CredentialType credentialType = createMock(CredentialType.class);
 
       expect(response.getPayload()).andReturn(Payloads.newStringPayload(
                   "The server has waited too long for the request to be sent by the client.")).times(3);
       expect(backoffHandler.shouldRetryRequest(command, response)).andReturn(true).once();
       expect(response.getStatusCode()).andReturn(408).once();
+      expect(credentialType.retryable()).andReturn(true).anyTimes();
 
       replay(command);
       replay(response);
       replay(cache);
       replay(backoffHandler);
+      replay(credentialType);
 
-      RetryOnRenew retry = new RetryOnRenew(cache, backoffHandler);
+      RetryOnRenew retry = new RetryOnRenew(cache, backoffHandler, credentialType);
 
       assertTrue(retry.shouldRetryRequest(command, response));
 
@@ -129,5 +141,31 @@ public class RetryOnRenewTest {
       verify(response);
       verify(cache);
       verify(backoffHandler);
+      verify(credentialType);
+   }
+
+   @Test
+   public void testNoRetry() {
+      HttpCommand command = createMock(HttpCommand.class);
+      HttpRequest request = createMock(HttpRequest.class);
+      HttpResponse response = createMock(HttpResponse.class);
+      @SuppressWarnings("unchecked")
+      LoadingCache<Credentials, Access> cache = createMock(LoadingCache.class);
+      BackoffLimitedRetryHandler backoffHandler = createMock(BackoffLimitedRetryHandler.class);
+      CredentialType credentialType = createMock(CredentialType.class);
+
+      expect(command.getCurrentRequest()).andReturn(request);
+
+      expect(response.getPayload()).andReturn(Payloads.newStringPayload("")).anyTimes();
+      expect(response.getStatusCode()).andReturn(401).atLeastOnce();
+      expect(credentialType.retryable()).andReturn(false);
+
+      replay(command, response, cache, backoffHandler, credentialType);
+
+      RetryOnRenew retry = new RetryOnRenew(cache, backoffHandler, credentialType);
+
+      assertFalse(retry.shouldRetryRequest(command, response));
+
+      verify(command, response, cache, backoffHandler, credentialType);
    }
 }

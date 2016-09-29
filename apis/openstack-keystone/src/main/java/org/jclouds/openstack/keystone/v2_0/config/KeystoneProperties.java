@@ -28,6 +28,7 @@ public final class KeystoneProperties {
     * <ul>
     * <li>apiAccessKeyCredentials</li>
     * <li>passwordCredentials</li>
+    * <li>token</li>
     * </ul>
     *
     * @see CredentialTypes

@@ -38,6 +38,7 @@ import org.jclouds.domain.Credentials;
 import org.jclouds.http.HttpRequest;
 import org.jclouds.http.HttpResponse;
 import org.jclouds.openstack.keystone.v2_0.AuthenticationApi;
+import org.jclouds.openstack.keystone.v2_0.config.CredentialType;
 import org.jclouds.openstack.keystone.v2_0.config.KeystoneAuthenticationModule;
 import org.jclouds.openstack.keystone.v2_0.domain.Access;
 import org.jclouds.openstack.keystone.v2_0.domain.Endpoint;
@@ -79,6 +80,7 @@ public final class SwiftAuthenticationModule extends KeystoneAuthenticationModul
                          .put("tempAuthCredentials", i.getInstance(TempAuth.class)).build();
    }
 
+   @CredentialType("temp")
    static final class TempAuth implements Function<Credentials, Access> {
       private final TempAuthApi delegate;
 

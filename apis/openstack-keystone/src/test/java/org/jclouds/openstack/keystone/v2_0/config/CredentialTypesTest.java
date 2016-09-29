@@ -17,8 +17,13 @@
 package org.jclouds.openstack.keystone.v2_0.config;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import org.jclouds.openstack.keystone.v2_0.domain.PasswordCredentials;
+import org.jclouds.openstack.keystone.v2_0.domain.TokenCredentials;
+import org.jclouds.openstack.keystone.v2_0.functions.AuthenticatePasswordCredentials;
+import org.jclouds.openstack.keystone.v2_0.functions.AuthenticateTokenCredentials;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableSet;
@@ -45,5 +50,21 @@ public class CredentialTypesTest {
    @Test(expectedExceptions = IllegalArgumentException.class)
    public void testIndexByCredentialTypeWithoutAnnotation() {
       CredentialTypes.indexByCredentialType(ImmutableSet.of(""));
+   }
+
+   public void testTokenCredentials() {
+      assertEquals(CredentialTypes.credentialTypeOf(
+               TokenCredentials.builder().id("d419ee71f234012a9b4525727995964").build()),
+               CredentialTypes.TOKEN_CREDENTIALS);
+   }
+
+   public void testNonRetryableCredentialType() {
+      final AuthenticateTokenCredentials authentication = new AuthenticateTokenCredentials(null);
+      assertFalse(CredentialTypes.credentialTypeObjectOf(authentication).retryable());
+   }
+
+   public void testDefaultRetryableCredentialType() {
+      final AuthenticatePasswordCredentials authentication = new AuthenticatePasswordCredentials(null);
+      assertTrue(CredentialTypes.credentialTypeObjectOf(authentication).retryable());
    }
 }
