@@ -1,7 +1,5 @@
-Please review the [How to Contribute](https://cwiki.apache.org/confluence/display/JCLOUDS/Contribute) page for information on how to submit your patch and how the review process works.
+The best is to contribute directly to the upstream project: [see Apache jcloud's contributing guide](https://github.com/jclouds/jclouds/blob/master/CONTRIBUTING.md).
 
-Also make sure all the changes are aligned with the [Coding Standards](https://cwiki.apache.org/confluence/display/JCLOUDS/Writing+jclouds+Code) of the project.
+However, we still accept pull requests. Thanks!
 
-Thanks!
 
-The Apache jclouds team

@@ -19,20 +19,13 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>apache</artifactId>
-    <version>14</version>
-    <relativePath />
-  </parent>
-  <groupId>org.apache.jclouds</groupId>
+  <groupId>com.amysta.jclouds</groupId>
   <artifactId>jclouds-project</artifactId>
   <version>2.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Apache jclouds Project</name>
-  <url>http://jclouds.apache.org/</url>
-  <description>Apache jclouds: Concurrent API for Cloud Services</description>
-  <inceptionYear>2009</inceptionYear>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <url>https://github.com/Amysta/jclouds</url>
+  <description>Amysta's fork of jclouds</description>
 
   <licenses>
     <license>
@@ -42,53 +35,18 @@
     </license>
   </licenses>
 
-
-  <issueManagement>
-    <system>JIRA</system>
-    <url>https://issues.apache.org/jira/browse/JCLOUDS</url>
-  </issueManagement>
-
-
-  <mailingLists>
-    <mailingList>
-      <name>User List</name>
-      <subscribe>user-subscribe@jclouds.apache.org</subscribe>
-      <unsubscribe>user-unsubscribe@jclouds.apache.org</unsubscribe>
-      <post>user@jclouds.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/jclouds-user/</archive>
-    </mailingList>
-    <mailingList>
-      <name>Developer List</name>
-      <subscribe>dev-subscribe@jclouds.apache.org</subscribe>
-      <unsubscribe>dev-unsubscribe@jclouds.apache.org</unsubscribe>
-      <post>dev@jclouds.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/jclouds-dev/</archive>
-    </mailingList>
-    <mailingList>
-      <name>Commits List</name>
-      <subscribe>commits-subscribe@jclouds.apache.org</subscribe>
-      <unsubscribe>commits-unsubscribe@jclouds.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/jclouds-commits/</archive>
-    </mailingList>
-    <mailingList>
-      <name>Issues List</name>
-      <subscribe>issues-subscribe@jclouds.apache.org</subscribe>
-      <unsubscribe>issues-unsubscribe@jclouds.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/jclouds-issues/</archive>
-    </mailingList>
-  </mailingLists>
-
   <scm>
-    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/jclouds.git</connection>
-    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/jclouds.git</developerConnection>
-    <url>https://git-wip-us.apache.org/repos/asf?p=jclouds.git</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:git://github.com/Amysta/jclouds.git</connection>
+    <developerConnection>scm:git:ssh://github.com:Amysta/jclouds.git</developerConnection>
+    <url>http://github.com/Amysta/jclouds/tree/${project.scm.tag}</url>
+    <tag>amysta</tag>
   </scm>
 
   <repositories>
     <repository>
-      <id>apache-snapshots</id>
-      <url>https://repository.apache.org/content/repositories/snapshots</url>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
@@ -97,26 +55,17 @@
       </snapshots>
     </repository>
   </repositories>
-
-  <!-- to allow downstream projects to access jclouds-resources in plugin config -->
-  <pluginRepositories>
-    <pluginRepository>
-      <id>apache-snapshots</id>
-      <url>https://repository.apache.org/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
-
   <distributionManagement>
-    <site>
-      <id>jclouds-github-pages-site</id>
-      <url>${maven.site.url.base}/${project.version}</url>
-    </site>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Nexus Release Repository</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <developers>
@@ -540,17 +489,17 @@
               <!-- CloudSigma bundles conflict between api and providers-->
               <conflictingDependencies>
                 <dependency>
-                  <groupId>org.apache.jclouds.api</groupId>
+                  <groupId>com.amysta.jclouds.api</groupId>
                   <artifactId>cloudsigma</artifactId>
                   <version>${project.version}</version>
                 </dependency>
                 <dependency>
-                  <groupId>org.apache.jclouds.provider</groupId>
+                  <groupId>com.amysta.jclouds.provider</groupId>
                   <artifactId>cloudsigma-lvs</artifactId>
                   <version>${project.version}</version>
                 </dependency>
                 <dependency>
-                  <groupId>org.apache.jclouds.provider</groupId>
+                  <groupId>com.amysta.jclouds.provider</groupId>
                   <artifactId>cloudsigma-zrh</artifactId>
                   <version>${project.version}</version>
                 </dependency>
@@ -1133,7 +1082,7 @@
             </executions>
             <dependencies>
               <dependency>
-                <groupId>org.apache.jclouds</groupId>
+                <groupId>com.amysta.jclouds</groupId>
                 <artifactId>jclouds-assemblies</artifactId>
                 <version>${project.version}</version>
               </dependency>
@@ -1231,7 +1180,7 @@
             <artifactId>maven-checkstyle-plugin</artifactId>
             <dependencies>
               <dependency>
-                <groupId>org.apache.jclouds</groupId>
+                <groupId>com.amysta.jclouds</groupId>
                 <artifactId>jclouds-resources</artifactId>
                 <version>${project.version}</version>
               </dependency>
@@ -1250,7 +1199,7 @@
             <artifactId>modernizer-maven-plugin</artifactId>
             <dependencies>
               <dependency>
-                <groupId>org.apache.jclouds</groupId>
+                <groupId>com.amysta.jclouds</groupId>
                 <artifactId>jclouds-resources</artifactId>
                 <version>${project.version}</version>
               </dependency>
