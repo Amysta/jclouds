@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.amysta.jclouds</groupId>
-    <artifactId>jclouds-project</artifactId>        
+    <artifactId>jclouds-project</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <relativePath>project/pom.xml</relativePath>
   </parent>
@@ -46,7 +46,13 @@
     <module>allloadbalancer</module>
     <module>all</module>
   </modules>
-  
+
+  <scm>
+    <connection>scm:git:git@github.com:Amysta/jclouds.git</connection>
+    <developerConnection>scm:git:git@github.com:Amysta/jclouds.git</developerConnection>
+    <url>http://github.com/Amysta/jclouds</url>
+  </scm>
+
   <profiles>
     <profile>
       <id>distribution</id>
@@ -71,7 +77,7 @@
                   </descriptors>
                 </configuration>
               </execution>
-            </executions>                               
+            </executions>
           </plugin>
         </plugins>
       </build>
