@@ -88,7 +88,7 @@ public class ObjectApiMockTest extends BaseOpenStackMockTest<SwiftApi> {
                   .name("test_obj_2")
                   .uri(URI.create(baseUri + "/test_obj_2"))
                   .etag("b039efe731ad111bc1b0ef221c3849d0")
-                  .payload(payload(64l, "application/octet-stream", null))
+                  .payload(payload(64L, "application/octet-stream", null))
                   .lastModified(dates.iso8601DateParse("2009-02-03T05:26:32.612278")).build(),
             SwiftObject.builder()
                   .name("test obj 3")
@@ -250,6 +250,77 @@ public class ObjectApiMockTest extends BaseOpenStackMockTest<SwiftApi> {
          for (Entry<String, String> entry : metadata.entrySet()) {
             assertEquals(replace.getHeader(OBJECT_METADATA_PREFIX + entry.getKey().toLowerCase()), entry.getValue());
          }
+      } finally {
+         server.shutdown();
+      }
+   }
+
+   public void testCreateWith401Retry() throws Exception {
+      // TODO: requires upgrade to okhttp mockwebserver 3.6
+
+      MockWebServer server = mockOpenStackServer();
+      server.enqueue(addCommonHeaders(new MockResponse().setBody(stringFromResource("/access.json"))));
+
+      // PUT 1 - establishes auth tokens
+      // Respond to request
+      // This part will work in mockwebserver 3.6+
+      // server.enqueue(new MockResponse().setResponseCode(100).setStatus("Continue"));
+
+      // Finish request
+      server.enqueue(addCommonHeaders(new MockResponse()
+            .setResponseCode(201)
+            .addHeader("ETag", "d9f5eb4bba4e2f2f046e54611bc8196b")));
+
+      // PUT 2
+      // Respond to request
+      // server.enqueue(new MockResponse().setStatus("HTTP/1.1 100 Continue").clearHeaders());
+      // token expired!
+      server.enqueue(addCommonHeaders(new MockResponse().setResponseCode(401).setBody("401 Unauthorized")));
+      // re-auth
+      server.enqueue(addCommonHeaders(new MockResponse().setBody(stringFromResource("/access2.json"))));
+
+      // Finally success
+      server.enqueue(addCommonHeaders(new MockResponse()
+            .setResponseCode(201)
+            .addHeader("ETag", "d9f5eb4bba4e2f2f046e54611bc8196b")));
+
+      try {
+         Properties overrides = new Properties();
+         overrides.setProperty(PROPERTY_MAX_RETRIES, 5 + "");
+
+         SwiftApi api = api(server.getUrl("/").toString(), "openstack-swift", overrides);
+         assertEquals(
+               api.getObjectApi("DFW", "myContainer").put("myObject1", PAYLOAD,
+                     metadata(metadata)), "d9f5eb4bba4e2f2f046e54611bc8196b");
+
+         assertEquals(
+               api.getObjectApi("DFW", "myContainer").put("myObject2", PAYLOAD,
+                     metadata(metadata)), "d9f5eb4bba4e2f2f046e54611bc8196b");
+
+         assertEquals(server.getRequestCount(), 5);
+
+         //////
+
+         // First auth (auth cache empty
+         assertAuthentication(server);
+
+         // PUT 1 request
+         RecordedRequest replace = server.takeRequest();
+         assertRequest(replace, "PUT", "/v1/MossoCloudFS_5bcf396e-39dd-45ff-93a1-712b9aba90a9/myContainer/myObject1");
+
+         // token expired
+
+         // PUT 2 request
+         replace = server.takeRequest();
+         assertRequest(replace, "PUT", "/v1/MossoCloudFS_5bcf396e-39dd-45ff-93a1-712b9aba90a9/myContainer/myObject2");
+
+         // PUT 2 request re-auth
+         assertAuthentication(server);
+
+         // PUT 2 request retry
+         replace = server.takeRequest();
+         assertRequest(replace, "PUT", "/v1/MossoCloudFS_5bcf396e-39dd-45ff-93a1-712b9aba90a9/myContainer/myObject2");
+
       } finally {
          server.shutdown();
       }
